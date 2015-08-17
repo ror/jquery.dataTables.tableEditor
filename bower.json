@@ -1,0 +1,27 @@
+{
+  "name": "Editable",
+  "version": "0.0.1",
+  "description": "Editable adds the ability to edit datatable cell data by adding inputs to allowed cells when clicking on a row within the table. It allows the user to easily edit the table data source.",
+  "moduleType": [
+    "amd"
+  ],
+  "keywords": [
+    "datatables",
+    "editable"
+  ],
+  "authors": [
+    "Aron Kerr (https://github.com/aronkerr)"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "datatables": "~1.10.7"
+  }
+}

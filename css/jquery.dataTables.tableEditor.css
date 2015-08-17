@@ -1,0 +1,22 @@
+table.dataTable tbody tr.locked,
+table.dataTable.display tbody tr.odd.locked,
+table.dataTable.display tbody tr.even.locked,
+table.dataTable.stripe tbody tr.odd.locked,
+table.dataTable.stripe tbody tr.even.locked,
+table.dataTable.display tbody tr.even.locked > .sorting_1,
+table.dataTable.display tbody tr.odd.locked > .sorting_1,
+table.dataTable.display tbody tr.locked > .sorting_1,
+table.dataTable.hover tbody tr.locked:hover,
+table.dataTable.hover tbody tr.locked.odd:hover,
+table.dataTable.hover tbody tr.locked.even:hover,
+table.dataTable.display tbody tr.locked:hover,
+table.dataTable.display tbody tr.locked.odd:hover,
+table.dataTable.display tbody tr.locked.even:hover
+{
+    background-color: #FFC;
+}
+
+table.dataTable.display tbody tr [data-editable="false"],
+table.dataTable.display tbody td [data-editable="false"] {
+    background-color: #EEE;
+}

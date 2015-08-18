@@ -1,19 +1,26 @@
 {
-  "name": "Editable",
+  "name": "TableEditor",
   "version": "0.0.1",
-  "description": "Editable adds the ability to edit datatable cell data by adding inputs to allowed cells when clicking on a row within the table. It allows the user to easily edit the table data source.",
+  "description": "TableEditor adds the ability to edit datatable data source.",
   "moduleType": [
     "amd"
   ],
   "keywords": [
     "datatables",
-    "editable"
+    "editable",
+    "editor",
+    "tableEditor"
   ],
   "authors": [
-    "Aron Kerr (https://github.com/aronkerr)"
+    "MoJie (https://github.com/mojied)"
   ],
-  "license": "MIT",
-  "private": true,
+  "license": [ "GPL-2.0", "MIT" ],
+  "main": [
+    "js/jquery.dataTables.tableEditor.js",
+    "css/jquery.dataTables.tableEditor.css",
+    "examples/app.js",
+    "examples/index.html"
+  ],
   "ignore": [
     "**/.*",
     "node_modules",
@@ -23,5 +30,13 @@
   ],
   "dependencies": {
     "datatables": "~1.10.7"
+  },
+  "devDependencies": {
+    "chai": "latest",
+    "chai-jquery": "latest",
+    "jquery-ui": "latest",
+    "mocha": "latest",
+    "sinonjs": "latest",
+    "underscore": "latest"
   }
 }

@@ -591,7 +591,8 @@ $(document).ready(function() {
             },
             {
                 "data": "salary",
-                "title": "Salary"
+                "title": "Salary",
+                "editable": true
             },
             {
                 "data": "start_date",

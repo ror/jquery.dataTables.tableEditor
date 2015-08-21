@@ -597,7 +597,9 @@ $(document).ready(function() {
             {
                 "data": "start_date",
                 "title": "Start Date",
-                "class": "center"
+                "class": "center",
+                "template": "date",
+                "editable": true
             },
             {
                 "data": "office",

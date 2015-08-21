@@ -29,7 +29,8 @@
     "tests"
   ],
   "dependencies": {
-    "datatables": "~1.10.7"
+    "jquery": ">=1.7.0",
+    "datatables": ">=1.10.7"
   },
   "devDependencies": {
     "chai": "latest",

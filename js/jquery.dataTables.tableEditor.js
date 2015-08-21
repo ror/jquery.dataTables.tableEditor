@@ -1,9 +1,9 @@
 /**
  * @project DataTables TableEditor
  * @maintainer MoJie
- * @version 0.0.6
+ * @version 0.0.1
  * @contributor MoJie
- * @file jquery.dataTables.tableeditor.js
+ * @file jquery.dataTables.tableEditor.js
  * @copyright Copyright 2014-2015 MoJie, all rights reserved.
  *
  * This source file is free software, under either the GPL v2 license or a
@@ -26,10 +26,10 @@
          *
          * @example
          *      $('#example').dataTable( {
- *          "editable": true,
- *      } );
+         *          "editable": true,
+         *      } );
          *
-         * - 添加class属性 'editable' 或 'dt-editable' 到html表格
+         * - 添加样式类属性 'editable' 或 'dt-editable' 到html表格
          *
          * @example
          *      <table id="example" class="display editable" cellspacing="0" width="100%"></table>
@@ -49,6 +49,7 @@
          *  @requires jQuery 1.7+
          *  @requires DataTables 1.10.7+
          */
+
         var TableEditor = function (dt, init) {
             var that = this;
 
@@ -63,12 +64,12 @@
                 return;
             }
 
-            // 如果设置没有传进来，设置他们
+            // 如果没有设置，初始化一个空对象
             if (typeof init == 'undefined') {
                 init = {};
             }
 
-            // 使用 DataTables 的 标记映射方法, 如果存在就提供驼峰对变量的兼容
+            // 使用 `DataTables.camelToHungarian` 标记映射方法, 提供驼峰变量
             if ($.fn.DataTable.camelToHungarian) {
                 $.fn.DataTable.camelToHungarian(TableEditor.defaults, init);
             }
@@ -83,7 +84,7 @@
                 dt: new $.fn.DataTable.Api(dt)
             };
 
-            // 查询已经删除和有状态的列，以便保存索引，后面使用
+            // 查询已经删除和有状态的列，以便保存索引，供后面使用
             $.each(dtSettings.aoColumns, function (index, settings) {
                 if (settings.mData == "deleted" || settings.data == "deleted" || settings.name == "deleted") {
                     that.s.deletedIdx = settings.idx;
@@ -104,9 +105,10 @@
             }
         }; //TableEditor
 
+        // TableEditor的私有方法都定义在原型里
         TableEditor.prototype = {
             /**
-             *  构造
+             *  构造器：检查、验证、注册事件，完成了整个流程
              *  @returns {void}
              *  @private
              */
@@ -126,7 +128,7 @@
 
                 $(this.s.dt.table().node()).on('click', 'i[data-action="unlock"]', function (e) {
                     e.stopPropagation();
-                    console.log('unlock');
+                    //console.log('unlock');
                 });
 
                 $(this.s.dt.table().node()).on('save.dt.editable', function (e) {
@@ -159,7 +161,7 @@
                         return;
                     }
 
-                    // 如果点击的行正被编辑或是它的后代，返回
+                    // 如果点击的行正被编辑或是它的子行在编辑，返回
                     if ($target.hasClass('editing') || $target.closest('tr.editing').length > 0) {
                         return;
                     }
@@ -167,7 +169,7 @@
                     $inputs = $activeRow.find('input');
                     $form = $table.closest('form');
 
-                    // 找到活动的行并保存它，如果它有输入
+                    // 找到活动的行并保存它，然后恢复
                     if ($inputs.filter(function () {
                             return $(this).val()
                         }).length == 0) {
@@ -282,7 +284,7 @@
                 if (data.status === 0) {
                     dt.cell(row.index(), this.s.deletedIdx).data(1);
 
-                    // 触发一个保存事件，可以将所有数据传递进入
+                    // 触发保存事件，将所有数据传递进入
                     $(dt.table().node()).trigger({
                         type: 'save.dt.editable',
                         rowIndex: row.index(),
@@ -290,7 +292,7 @@
                     });
                 }
 
-                // 如果行未增加或未从数据源加载，从 `dirtyData` 清理掉。
+                // 如果行未增加或未从数据源加载，清理掉`dirtyData`。
                 if (data.status === 'undefined' || data.status === null) {
                     delete this._dirtyValues[row.index()];
                 }
@@ -301,8 +303,8 @@
             },
 
             /**
-             *  获得包含在当前被被编辑行的输入框内的当前数据，保存数据到 `datatable` 数据源，
-             *  并将被编辑的单元格变回没有输入状态的单元格
+             *  获得当前被编辑行输入的当前数据，保存数据到 `datatable` 数据源，然后将被编辑的单元格变回没有输入状态的单元格
+             *
              *  @event save.dataTableEditor 触发和传入行索引、行新数据
              *  @event click.dataTableEditor 删除事件监听事件
              *  @returns {void}
@@ -353,7 +355,7 @@
 
                     dt.draw(false);
 
-                    // 触发保存事件，用户可以传入数据
+                    // 触发保存事件，传入数据
                     $(dt.table().node()).trigger({
                         type: 'save.dt.editable',
                         rowIndex: rowIdx,
@@ -372,6 +374,8 @@
 
                 return dt.settings()[0].aoColumns[cellIdx].editable || $(dt.table().header()).find('th').eq(cellIdx).attr('data-editable') == "true";
             },
+
+            // 单元格数据模板
             _getRowTemplate: function ($row, isNew) {
                 var that = this,
                     dt = this.s.dt;
@@ -471,7 +475,7 @@
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
          * 常量
          * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-        TableEditor.version = "0.0.6";
+        TableEditor.version = "0.0.1";
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
          * 初始化

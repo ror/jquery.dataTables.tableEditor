@@ -3,7 +3,7 @@
  * @maintainer MoJie
  * @version 0.0.1
  * @contributor MoJie
- * @file jquery.dataTables.tableEditor.js
+ * @file dataTables.tableEditor.inline.js
  * @copyright Copyright 2014-2015 MoJie, all rights reserved.
  *
  * This source file is free software, under either the GPL v2 license or a
@@ -47,16 +47,16 @@
          *
          *
          *  @requires jQuery 1.7+
-         *  @requires DataTables 1.10.7+
+         *  @requires DataTables 1.10.8+
          */
 
         var TableEditor = function (dt, init) {
-            var that = this;
+            var self = this;
 
             // 正常检查
-            // 检查 DataTables 版本，是否 1.10.7 或更新
-            if (!DataTable.versionCheck || !DataTable.versionCheck('1.10.7')) {
-                throw 'DataTables TableEditor requires DataTables 1.10.7 or newer';
+            // 检查 DataTables 版本，是否 1.10.8 或更新
+            if (!DataTable.versionCheck || !DataTable.versionCheck('1.10.8')) {
+                throw 'DataTables TableEditor requires DataTables 1.10.8 or newer';
             }
 
             // 检查 `TableEditor` 是否已经初始化
@@ -64,7 +64,7 @@
                 return;
             }
 
-            // 如果没有设置，初始化一个空对象
+            // 如果没有设置，初始化 `TableEditor` 设置
             if (typeof init == 'undefined') {
                 init = {};
             }
@@ -74,12 +74,13 @@
                 $.fn.DataTable.camelToHungarian(TableEditor.defaults, init);
             }
 
-            // 从v1.10开始，就允许各种方式获得设置
+            // 获得 `DataTables` 设置
             var dtSettings = $.fn.DataTable.Api ? new $.fn.DataTable.Api(dt).settings()[0] : dt.settings();
 
-            // 附加 `TableEditor`实例给 `DataTables`实例，方便调用
+            // 附加 `TableEditor`实例给 `DataTables`实例设置，方便调用
             dtSettings._TableEditor = this;
 
+            // 定义的一个全局变量，方便调用
             this.s = {
                 dt: new $.fn.DataTable.Api(dt)
             };
@@ -87,17 +88,17 @@
             // 查询已经删除和有状态的列，以便保存索引，供后面使用
             $.each(dtSettings.aoColumns, function (index, settings) {
                 if (settings.mData == "deleted" || settings.data == "deleted" || settings.name == "deleted") {
-                    that.s.deletedIdx = settings.idx;
+                    self.s.deletedIdx = settings.idx;
                 }
                 if (settings.mData == "status" || settings.data == "status" || settings.name == "status") {
-                    that.s.statusIdx = settings.idx;
+                    self.s.statusIdx = settings.idx;
                 }
             });
 
             // 构建实例
             if (!dtSettings._bInitComplete) {
                 dtSettings.oApi._fnCallbackReg(dtSettings, 'aoInitComplete', function () {
-                    that._construct(init);
+                    self._construct(init);
                 });
             }
             else {
@@ -105,25 +106,26 @@
             }
         }; //TableEditor
 
-        // TableEditor的私有方法都定义在原型里
+        // 定义TableEditor的私有方法（js没有私有方法，只不过这些方法，建议不要直接调用）
         TableEditor.prototype = {
             /**
-             *  构造器：检查、验证、注册事件，完成了整个流程
+             *  构造器：检查、验证、注册事件等，整个流程
              *  @returns {void}
              *  @private
              */
             _construct: function (init) {
-                var that = this;
+                var self = this;
 
                 // 保存表单数据到 `_startingValues`
                 this._dataSaved();
 
                 // 设置锁定和已公布的属性与类
-                that._checkStatus();
+                self._checkStatus();
 
+                // 注册事件
                 // 附加 `draw` 事件，当表格改变时检查状态
                 $(this.s.dt.table().node()).on('draw.dt', function (e, settings) {
-                    that._checkStatus();
+                    self._checkStatus();
                 });
 
                 $(this.s.dt.table().node()).on('click', 'i[data-action="unlock"]', function (e) {
@@ -132,21 +134,21 @@
                 });
 
                 $(this.s.dt.table().node()).on('save.dt.editable', function (e) {
-                    that._updateRowState($(that.s.dt.row(e.rowIndex)));
+                    self._updateRowState($(self.s.dt.row(e.rowIndex)));
                 });
 
                 $(this.s.dt.table().node()).on('click', 'i[data-action="delete"]', function (e) {
                     e.stopPropagation();
-                    that._deleteRow(that.s.dt.row($(this).closest('tr')));
+                    self._deleteRow(self.s.dt.row($(this).closest('tr')));
                 });
 
                 $(document).on('click', '[data-action="addRow"]', function (e) {
-                    that._addRow();
+                    self._addRow();
                 });
 
                 $(document).on('click', function (e) {
                     var $target = $(e.target),
-                        $table = $(that.s.dt.table().node()),
+                        $table = $(self.s.dt.table().node()),
                         $activeRow = $table.find('tr.editing'),
                         $inputs,
                         $form;
@@ -178,7 +180,7 @@
                     }
 
                     if ($inputs.length > 0 && ($form.length === 0 || $form.valid())) {
-                        that._callSaveHandler(that.s.dt, $activeRow);
+                        self._callSaveHandler(self.s.dt, $activeRow);
                     }
                 });
 
@@ -206,7 +208,7 @@
             },
 
             _checkStatus: function (rows) {
-                var that = this;
+                var self = this;
 
                 // 如果行是未定义的，则将其设置为应用筛选器的当前行。
                 if (typeof rows == 'undefined') {
@@ -217,15 +219,15 @@
                     // 确保状态存在
                     var row = this.row(index),
                         status = row.data().status;
-                    if (status == 0) {
-                        that._unlockRow(row);
-                        that._unpublishRow(row);
+                    if (status == 0) { //解锁、未发布
+                        self._unlockRow(row);
+                        self._unpublishRow(row);
                     }
-                    if (status == 1) {
-                        that._lockRow(row);
+                    if (status == 1) { //锁定
+                        self._lockRow(row);
                     }
-                    if (status == 2) {
-                        that._publishRow(row);
+                    if (status == 2) { //发布
+                        self._publishRow(row);
                     }
                 });
             },
@@ -377,7 +379,7 @@
 
             // 单元格数据模板
             _getRowTemplate: function ($row, isNew) {
-                var that = this,
+                var self = this,
                     dt = this.s.dt;
 
                 if (typeof isNew == 'undefined') {
@@ -389,7 +391,7 @@
                     var $cell = $(this),
                         $th = $(dt.table().header()).find('th').eq(key);
 
-                    if (isNew || that._isEditable(dt, $cell)) {
+                    if (isNew || self._isEditable(dt, $cell)) {
                         var template = ($th && $th.attr('data-template')) ? $($th.attr('data-template')) : $('<input type="text" class="span12" value="">'),
                             $html;
 
@@ -426,12 +428,14 @@
 
                 // 获得行模板
                 this._getRowTemplate($row);
+                //$.fn.dataTable.Editor.buildModal({title: "hello world"});
 
                 // 添加类样式属性 'editing'
                 $row.addClass('editing');
 
                 this._setFocus(dt, $row, $cell);
             },
+
             _callUserDefinedEditHandler: function ($cell, $row, $table) {
                 var namespaces = $table.attr('data-action-edit').split('.'),
                     editHandler = namespaces.pop(),
@@ -485,7 +489,7 @@
         $.fn.DataTable.TableEditor = TableEditor;
         $.fn.dataTable.tableEditor = TableEditor;
 
-        // DataTables 1.10.7 API 方法别名
+        // DataTables 1.10.8 API 方法别名
         if ($.fn.DataTable.Api) {
             var Api = $.fn.DataTable.Api;
 
@@ -547,7 +551,7 @@
             });
         }
 
-        // 事件监听接口
+        // 事件监听接口 - 操作的入口，点击触发 `inline` 编辑
         $(document).on('click', 'table.dataTable tr:gt(0) td:not(:has("input"))', function (e) {
             var $table = $(this).closest('table'),
                 dtSettings = $table.DataTable().settings()[0];
@@ -566,13 +570,25 @@
 
         // 给文档添加接口，监听 `DataTables` 的初始化事件，以便自动初始化
         $(document).on('init.dt.dtr', function (e, settings, json) {
+
+            /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+             * 有以下情况之一就会初始化 `TableEditor`，例如：
+             *
+             *     $('#example').DataTable( {
+             *         ...
+             *         editable: true,
+             *         editor: {
+             *             fields: {key: value}
+             *         }
+             * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
             if ($(settings.nTable).hasClass('editable') ||
                 $(settings.nTable).hasClass('dt-editable') ||
                 $(settings.nTable).attr('data-editable') == true ||
                 settings.oInit.editable ||
                 DataTable.defaults.editable
             ) {
-                var init = settings.oInit.TableEditor;
+                var init = settings.oInit.editor; //针对 `TableEditor`的配置在这里
 
                 if (init !== false) {
                     new TableEditor(settings, $.isPlainObject(init) ? init : {});

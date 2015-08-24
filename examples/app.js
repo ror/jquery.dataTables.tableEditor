@@ -593,11 +593,25 @@ $(document).ready(function () {
                 "data": "name",
                 "title": "Name",
                 "editable": true
+                //"type": "text" 默认是input
             },
             {
                 "data": "position",
                 "title": "Position",
-                "editable": true
+                "editable": true,
+                "type": "select", //默认使用select2.js
+                "options": {
+                    width: 'element',
+                    height: '50px',
+                    //tags: "true",
+                    //placeholder: "Select an option",
+                    "data": [
+                        {id: 0, text: 'enhancement'},
+                        {id: 1, text: 'bug'},
+                        {id: 2, text: 'duplicate'},
+                        {id: 3, text: 'invalid'},
+                        {id: 4, text: 'wontfix'}]
+                }
             },
             {
                 "data": "salary",
@@ -610,7 +624,7 @@ $(document).ready(function () {
                 "class": "center",
                 "type": "date",
                 "template": function () {
-                    return $('<input type="text" class="span10" value="hello world">');
+                    return $('<input type="text" class="span12" value="">');
                 },
                 "editable": true
             },
@@ -647,18 +661,12 @@ $(document).ready(function () {
             }
         ],
 
-        // tableEditor
+// tableEditor
         editable: true,
         dirtyData: true,
         lockable: true,
-        deletable: true,
-        editor: {
-            fields: {
-                "data": "name",
-                "title": "Name",
-                "editable": true
-            }
-        }
-
-    });
-});
+        deletable: true
+    })
+    ;
+})
+;

@@ -14,7 +14,10 @@
   "authors": [
     "MoJie (https://github.com/mojied)"
   ],
-  "license": [ "GPL-2.0", "MIT" ],
+  "license": [
+    "GPL-2.0",
+    "MIT"
+  ],
   "main": [
     "js/jquery.dataTables.tableEditor.js",
     "css/jquery.dataTables.tableEditor.css",
@@ -30,7 +33,8 @@
   ],
   "dependencies": {
     "jquery": ">=1.7.0",
-    "datatables": ">=1.10.8"
+    "datatables": ">=1.10.8",
+    "select2": "~4.0.0"
   },
   "devDependencies": {
     "chai": "latest",

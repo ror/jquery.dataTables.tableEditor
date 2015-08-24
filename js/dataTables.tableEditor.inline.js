@@ -78,7 +78,7 @@
             var dtSettings = $.fn.DataTable.Api ? new $.fn.DataTable.Api(dt).settings()[0] : dt.settings();
 
             // 附加 `TableEditor`实例给 `DataTables`实例设置，方便调用
-            dtSettings._TableEditor = this;
+            dtSettings._tableEditor = this;
 
             // 定义的一个全局变量，方便调用
             this.s = {
@@ -201,7 +201,7 @@
                         }
 
                         if ($table.find('tr.editing').length > 0 && $inputs.length > 0 && ($form.length === 0 || $form.valid())) {
-                            dt.settings()[0]._TableEditor._callSaveHandler(dt, $row);
+                            dt.settings()[0]._tableEditor._callSaveHandler(dt, $row);
                         }
                     }
                 });
@@ -389,34 +389,64 @@
                 // 查找每个`td`，并依据对应`th`的`data-input-type`类型，将其转化为输入框
                 $row.find('td').each(function (key, value) {
                     var $cell = $(this),
-                        cellIdx = dt.cell($cell).index().column,
-                        $th = $(dt.table().header()).find('th').eq(key);
+                        cellIdx = dt.cell($cell).index().column;
+                    //$th = $(dt.table().header()).find('th').eq(key);
 
                     if (isNew || self._isEditable(dt, $cell)) {
 
-                        var aoColumnTemplate = dt.settings()[0].aoColumns[cellIdx].template,
-                            template, $html;
+                        //var aoColumnTemplate = dt.settings()[0].aoColumns[cellIdx].template,
+                        var oCellSetting = dt.settings()[0].aoColumns[cellIdx],
+                            $html;
 
-                        //todo 应该依据sType加载对应模板
-                        console.log(dt.settings()[0].aoColumns[cellIdx]);
-
-                        if (aoColumnTemplate) {
-                            template = typeof aoColumnTemplate == 'function' ? aoColumnTemplate() : aoColumnTemplate;
-                        }else{
-                            template = $('<input type="text" class="span12" value="">');
-                        }
-
-                        if (template.is('input')) {
-                            $html = template.val($cell.text());
-                        } else {
-                            template.find('input').val($cell.text());
-                            $html = template;
-                        }
+                        $html = self._getCellTemplate($cell, oCellSetting);
 
                         $cell.html($html);
                     }
                 });
             },
+
+            _getCellTemplate: function (oCell, oCellSetting) {
+                var dt = this.s.dt,
+                    $cell = oCell,
+                    sType = oCellSetting.type,
+                    $html, template;
+
+                switch (sType) {
+                    //使用select2.js
+                    case "select":
+                    {
+                        //fixme 没有产生预期效果
+                        //$cell.html($('<select"></select>'));
+                        template = $('<select"></select>').select2(oCellSetting.options || {});
+                        template.find('option:selected').val($cell.text());
+                        break;
+                    }
+                    default:
+                    {
+                        template = $('<input type="text" class="span12" value="">');
+                        //break;
+                    }
+                }
+
+                //todo 应该依据sType加载对应模板
+                //console.log(dt.settings()[0].aoColumns[cellIdx]);
+
+                //if (aoColumnTemplate) {
+                //    template = typeof aoColumnTemplate == 'function' ? aoColumnTemplate() : aoColumnTemplate;
+                //}else{
+                //    template =
+                //}
+
+                //if (template.is('input')) {
+                //    $html = template.val($cell.text());
+                //} else {
+                //    template.find('input').val($cell.text());
+                    $html = template;
+                //}
+
+                return $html;
+            },
+
             _setFocus: function (dt, $row, $cell) {
                 // 设置焦点，首选点击的单元格（可编辑的），否则放在第一个可编辑单元格上
                 if (typeof $cell != 'undefined' && this._isEditable(dt, $cell)) {
@@ -509,39 +539,39 @@
             });
 
             Api.register('TableEditor.addRow()', function () {
-                this.settings()[0]._TableEditor._addRow();
+                this.settings()[0]._tableEditor._addRow();
                 return this;
             });
 
             Api.register('TableEditor.getDirtyData()', function () {
-                return this.settings()[0]._TableEditor._dirtyValues;
+                return this.settings()[0]._tableEditor._dirtyValues;
             });
 
             Api.register('TableEditor.dataSaved()', function () {
-                this.settings()[0]._TableEditor._dataSaved();
+                this.settings()[0]._tableEditor._dataSaved();
                 return this;
             });
 
             Api.register('TableEditor.rollbackData()', function () {
-                this.settings()[0]._TableEditor._rollbackData();
+                this.settings()[0]._tableEditor._rollbackData();
                 return this;
             });
 
             Api.register('TableEditor.updateRowState()', function ($row) {
-                this.settings()[0]._TableEditor._updateRowState($row);
+                this.settings()[0]._tableEditor._updateRowState($row);
                 return this;
             });
 
             Api.register('TableEditor.lockRows()', function () {
                 this.iterator('row', function (context, index) {
-                    this.cell(index, this.settings()[0]._TableEditor.s.statusIdx).data(1);
+                    this.cell(index, this.settings()[0]._tableEditor.s.statusIdx).data(1);
                 });
                 return this;
             });
 
             Api.register('TableEditor.unlockRows()', function () {
                 this.iterator('row', function (context, index) {
-                    this.cell(index, this.settings()[0]._TableEditor.s.statusIdx).data(0);
+                    this.cell(index, this.settings()[0]._tableEditor.s.statusIdx).data(0);
                 });
                 return this;
             });
@@ -549,14 +579,14 @@
             Api.register('TableEditor.publishRows()', function () {
                 var that = this;
                 this.iterator('row', function (context, index) {
-                    this.cell(index, this.settings()[0]._TableEditor.s.statusIdx).data(2);
+                    this.cell(index, this.settings()[0]._tableEditor.s.statusIdx).data(2);
                 });
                 return this;
             });
 
             Api.register('TableEditor.unpublishRows()', function () {
                 this.iterator('row', function (context, index) {
-                    this.cell(index, this.settings()[0]._TableEditor.s.statusIdx).data(1);
+                    this.cell(index, this.settings()[0]._tableEditor.s.statusIdx).data(1);
                 });
                 return this;
             });
@@ -567,14 +597,14 @@
             var $table = $(this).closest('table'),
                 dtSettings = $table.DataTable().settings()[0];
 
-            if ($.fn.DataTable.isDataTable($table) && dtSettings._TableEditor) {
+            if ($.fn.DataTable.isDataTable($table) && dtSettings._tableEditor) {
                 var $cell = $(this),
                     $row = $cell.closest('tr');
 
                 if ($table.attr('data-action-edit')) {
-                    dtSettings._TableEditor._callUserDefinedEditHandler($cell, $row, $table);
+                    dtSettings._tableEditor._callUserDefinedEditHandler($cell, $row, $table);
                 } else {
-                    dtSettings._TableEditor._callDefaultEditHandler($cell, $row, $table);
+                    dtSettings._tableEditor._callDefaultEditHandler($cell, $row, $table);
                 }
             }
         });
@@ -599,10 +629,10 @@
                 settings.oInit.editable ||
                 DataTable.defaults.editable
             ) {
-                var init = settings.oInit.editor; //针对 `TableEditor`的配置在这里
+                var opts = settings.oInit.editor || TableEditor.defaults; //针对 `TableEditor`的配置在'editor'选项这里，但基本未使用
 
-                if (init !== false) {
-                    new TableEditor(settings, $.isPlainObject(init) ? init : {});
+                if (opts && !settings._tableEditor) {
+                    new TableEditor(settings, $.isPlainObject(opts) ? opts : {});
                 }
             }
         });

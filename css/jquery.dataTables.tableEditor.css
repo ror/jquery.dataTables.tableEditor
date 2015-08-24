@@ -11,12 +11,17 @@ table.dataTable.hover tbody tr.locked.odd:hover,
 table.dataTable.hover tbody tr.locked.even:hover,
 table.dataTable.display tbody tr.locked:hover,
 table.dataTable.display tbody tr.locked.odd:hover,
-table.dataTable.display tbody tr.locked.even:hover
-{
+table.dataTable.display tbody tr.locked.even:hover {
     background-color: #FFC;
 }
 
 table.dataTable.display tbody tr [data-editable="false"],
 table.dataTable.display tbody td [data-editable="false"] {
     background-color: #EEE;
+}
+
+table.dataTable.display tbody tr td select {
+    height: 100%;
+    width: 100%;
+    position: relative;
 }

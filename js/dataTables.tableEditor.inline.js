@@ -219,7 +219,8 @@
                     // 确保状态存在
                     var row = this.row(index),
                         status = row.data().status;
-                    if (status == 0) { //解锁、未发布
+                    if (status == 0) { //解锁、未发布 - 编辑状态
+                        console.log('status ' + status);
                         self._unlockRow(row);
                         self._unpublishRow(row);
                     }
@@ -236,7 +237,6 @@
             },
             _unlockRow: function (row) {
                 $(row.node()).removeClass('locked').attr('data-locked', false).attr('data-editable', true);
-
             },
             _publishRow: function (row) {
                 $(row.node()).addClass('published').attr('data-published', true);
@@ -389,10 +389,13 @@
                 // 查找每个`td`，并依据对应`th`的`data-input-type`类型，将其转化为输入框
                 $row.find('td').each(function (key, value) {
                     var $cell = $(this),
+                        cellIdx = dt.cell($cell).index().column,
                         $th = $(dt.table().header()).find('th').eq(key);
 
                     if (isNew || self._isEditable(dt, $cell)) {
-                        var template = ($th && $th.attr('data-template')) ? $($th.attr('data-template')) : $('<input type="text" class="span12" value="">'),
+
+                        //fixme
+                        var template = (dt.settings()[0].aoColumns[cellIdx].template) ? dt.settings()[0].aoColumns[cellIdx].template() : $('<input type="text" class="span12" value="">'),
                             $html;
 
                         if (template.is('input')) {

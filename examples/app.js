@@ -575,18 +575,18 @@ $(document).ready(function () {
     $('#example').DataTable({
         "data": dataJson,
 
-        "columnDefs": [
-            {
-// The `data` parameter refers to the data for the cell (defined by the
-// `data` option, which defaults to the column being worked with, in
-// this case `data: 0`.
-                "render": function (data, type, row) {
-                    return data + ' (' + type + ')';
-                },
-                "targets": 0
-            },
-            {"visible": false, "targets": [2]}
-        ],
+        //"columnDefs": [
+        //    {
+        //        // The `data` parameter refers to the data for the cell (defined by the
+        //        // `data` option, which defaults to the column being worked with, in
+        //        // this case `data: 0`.
+        //        "render": function (data, type, row) {
+        //            return data + ' (' + type + ')';
+        //        },
+        //        "targets": 0
+        //    },
+        //    {"visible": false, "targets": [2]}
+        //],
 
         columns: [
             {
@@ -608,7 +608,9 @@ $(document).ready(function () {
                 "data": "start_date",
                 "title": "Start Date",
                 "class": "center",
-                "data-template": "hello world",
+                "template": function () {
+                    return $('<input type="text" class="span10" value="hello world">');
+                },
                 "editable": true
             },
             {
@@ -643,8 +645,6 @@ $(document).ready(function () {
                 "sortable": false
             }
         ],
-
-        //"lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
 
         // tableEditor
         editable: true,

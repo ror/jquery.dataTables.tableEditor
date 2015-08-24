@@ -608,6 +608,7 @@ $(document).ready(function () {
                 "data": "start_date",
                 "title": "Start Date",
                 "class": "center",
+                "type": "date",
                 "template": function () {
                     return $('<input type="text" class="span10" value="hello world">');
                 },

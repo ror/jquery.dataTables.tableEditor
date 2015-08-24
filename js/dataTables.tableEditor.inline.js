@@ -394,9 +394,17 @@
 
                     if (isNew || self._isEditable(dt, $cell)) {
 
-                        //fixme
-                        var template = (dt.settings()[0].aoColumns[cellIdx].template) ? dt.settings()[0].aoColumns[cellIdx].template() : $('<input type="text" class="span12" value="">'),
-                            $html;
+                        var aoColumnTemplate = dt.settings()[0].aoColumns[cellIdx].template,
+                            template, $html;
+
+                        //todo 应该依据sType加载对应模板
+                        console.log(dt.settings()[0].aoColumns[cellIdx]);
+
+                        if (aoColumnTemplate) {
+                            template = typeof aoColumnTemplate == 'function' ? aoColumnTemplate() : aoColumnTemplate;
+                        }else{
+                            template = $('<input type="text" class="span12" value="">');
+                        }
 
                         if (template.is('input')) {
                             $html = template.val($cell.text());

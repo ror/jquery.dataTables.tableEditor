@@ -575,7 +575,8 @@ $(document).ready(function () {
     $('#example').DataTable({
         "data": dataJson,
 
-        //"columnDefs": [
+        // 对列进行控制
+        // "columnDefs": [
         //    {
         //        // The `data` parameter refers to the data for the cell (defined by the
         //        // `data` option, which defaults to the column being worked with, in
@@ -601,16 +602,14 @@ $(document).ready(function () {
                 "editable": true,
                 "type": "select", //默认使用select2.js
                 "options": {
-                    width: 'element',
-                    height: '50px',
+                    //width: 'element',
+                    //height: '50px',
                     //tags: "true",
-                    //placeholder: "Select an option",
+                    placeholder: "Select an option",
                     "data": [
-                        {id: 0, text: 'enhancement'},
-                        {id: 1, text: 'bug'},
-                        {id: 2, text: 'duplicate'},
-                        {id: 3, text: 'invalid'},
-                        {id: 4, text: 'wontfix'}]
+                        {id: 'System Architect', text: 'System Architect'},
+                        {id: 'Accountant', text: 'Accountant'}
+                    ]
                 }
             },
             {
@@ -618,16 +617,19 @@ $(document).ready(function () {
                 "title": "Salary",
                 "editable": true
             },
+
             {
                 "data": "start_date",
                 "title": "Start Date",
                 "class": "center",
+                "editable": true,
                 "type": "date",
-                "template": function () {
-                    return $('<input type="text" class="span12" value="">');
-                },
-                "editable": true
+                "options": {
+                    format: 'yyyy/mm/dd',
+                    startDate: '-3d'
+                }
             },
+
             {
                 "data": "office",
                 "title": "Office",
@@ -661,12 +663,10 @@ $(document).ready(function () {
             }
         ],
 
-// tableEditor
         editable: true,
         dirtyData: true,
         lockable: true,
         deletable: true
     })
-    ;
 })
 ;

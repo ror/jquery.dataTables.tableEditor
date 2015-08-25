@@ -220,7 +220,6 @@
                     var row = this.row(index),
                         status = row.data().status;
                     if (status == 0) { //解锁、未发布 - 编辑状态
-                        console.log('status ' + status);
                         self._unlockRow(row);
                         self._unpublishRow(row);
                     }
@@ -390,17 +389,13 @@
                 $row.find('td').each(function (key, value) {
                     var $cell = $(this),
                         cellIdx = dt.cell($cell).index().column;
-                    //$th = $(dt.table().header()).find('th').eq(key);
 
                     if (isNew || self._isEditable(dt, $cell)) {
 
-                        //var aoColumnTemplate = dt.settings()[0].aoColumns[cellIdx].template,
                         var oCellSetting = dt.settings()[0].aoColumns[cellIdx],
                             $html;
 
-                        $html = self._getCellTemplate($cell, oCellSetting);
-
-                        $cell.html($html);
+                        self._getCellTemplate($cell, oCellSetting);
                     }
                 });
             },
@@ -409,42 +404,64 @@
                 var dt = this.s.dt,
                     $cell = oCell,
                     sType = oCellSetting.type,
+                    oOptions = oCellSetting.options || {},
                     $html, template;
+
+                //保存原始值
+                var sText = $cell.text();
 
                 switch (sType) {
                     //使用select2.js
                     case "select":
                     {
-                        //fixme 没有产生预期效果
-                        //$cell.html($('<select"></select>'));
-                        template = $('<select"></select>').select2(oCellSetting.options || {});
-                        template.find('option:selected').val($cell.text());
+                        //确保引入select2.js
+                        if (typeof $.fn.select2 === 'undefined') {
+                            alert('Select2 has not been installed, please download it from https://select2.github.io/ !');
+                        }
+
+                        //添加select元素 - 必须先写入，不然后续无法使用
+                        var $select = $cell.html($("<select></select>")).find('select');
+
+                        //构建select2
+                        template = $select.select2(oOptions);
+
+                        //设定当前值为默认选定值
+                        template = $select.select2("val", sText);
+
+                        break;
+                    }
+                    case "date" :
+                    {
+                        //确保引入bootstrap-datepicker.js,并且版本大于 `1.4.0`
+                        if (typeof $.fn.datepicker === 'undefined' || !TableEditor.versionCheck($.fn.datepicker.version, "1.4.0")) {
+                            alert('Bootstrap Datepicker has not been installed, please download it from https://github.com/eternicode/bootstrap-datepicker !');
+                        }
+
+                        // 默认使用 `input` 文本域
+                        template = $('<input type="text" class="span12" value="">');
+
+                        // 构建datepicker
+                        template.datepicker(oOptions);
+
+                        // 设定原值为默认值
+                        $cell.html(template.val(sText));
                         break;
                     }
                     default:
                     {
                         template = $('<input type="text" class="span12" value="">');
+
+                        if (template.is('input')) {
+                            $html = template.val($cell.text());
+                        } else {
+                            template.find('input').val($cell.text());
+                            $html = template;
+                        }
+
+                        $cell.html(template);
                         //break;
                     }
                 }
-
-                //todo 应该依据sType加载对应模板
-                //console.log(dt.settings()[0].aoColumns[cellIdx]);
-
-                //if (aoColumnTemplate) {
-                //    template = typeof aoColumnTemplate == 'function' ? aoColumnTemplate() : aoColumnTemplate;
-                //}else{
-                //    template =
-                //}
-
-                //if (template.is('input')) {
-                //    $html = template.val($cell.text());
-                //} else {
-                //    template.find('input').val($cell.text());
-                    $html = template;
-                //}
-
-                return $html;
             },
 
             _setFocus: function (dt, $row, $cell) {
@@ -513,14 +530,49 @@
         }; // /TableEditor.prototype
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-         * 静态
+         * 默认配置
          * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
         TableEditor.defaults = {};
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-         * 常量
+         * 常量：
          * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
         TableEditor.version = "0.0.1";
+
+        /**
+         * 检测插件版本:
+         *
+         *  @param {string} current 当前版本号
+         *  @param {string} target  目标版本号
+         *  @returns {boolean} true 如果大于或等于限定版本，返回真
+         *  @static
+         *  @dtopt API-Static
+         *
+         *  @example
+         *    alert( TableEditor.versionCheck(TableEditor.version， '0.1.0') ); //返回 false
+         */
+        TableEditor.versionCheck = function( current, target )
+        {
+            var aThis = current.split('.');
+            var aThat = target.split('.');
+            var iThis, iThat;
+
+            for ( var i=0, iLen=aThat.length ; i<iLen ; i++ ) {
+                iThis = parseInt( aThis[i], 10 ) || 0;
+                iThat = parseInt( aThat[i], 10 ) || 0;
+
+                // Parts are the same, keep comparing
+                if (iThis === iThat) {
+                    continue;
+                }
+
+                console.log(iThis);
+                // Parts are different, return immediately
+                return iThis > iThat;
+            }
+
+            return true;
+        };
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
          * 初始化

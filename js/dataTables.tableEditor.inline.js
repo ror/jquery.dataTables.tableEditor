@@ -387,10 +387,11 @@
 
                 // 查找每个`td`，并依据对应`th`的`data-input-type`类型，将其转化为输入框
                 $row.find('td').each(function (key, value) {
-                    var $cell = $(this),
-                        cellIdx = dt.cell($cell).index().column;
+                    var $cell = $(this);
 
                     if (isNew || self._isEditable(dt, $cell)) {
+
+                        var cellIdx = dt.cell($cell).index().column;
 
                         var oCellSetting = dt.settings()[0].aoColumns[cellIdx],
                             $html;
@@ -506,24 +507,29 @@
                 // 调用编辑处理函数
                 context[editHandler].call(this, $row, $table);
             },
+
             _addRow: function () {
                 var dt = this.s.dt,
                     $table = $(dt.table().node()),
-                    $header = $(dt.table().header()),
-                    $row = $("<tr></tr>");
+                    //$header = $(dt.table().header()),
+                    $row,
+                    aData = [];
 
-                // If there is already a row being edited then return early
+                // 如果有行在编辑，返回
                 if ($('tr.editing', $table).length > 0) {
                     return;
                 }
 
-                $header.find('th').each(function (key, value) {
-                    $row.append("<td></td>");
-                });
+                // fixme dataTable不允许添加 `null` 值的行，这里用空字符串代替
+                //$header.find('th').each(function (key, value) {
+                //    aData.push("a" + key);
+                //});
+                //console.log(aData)
 
+                // 不能使用 `append` 等方法操作表格，否则无法应用下面的模板
+                $row = $(dt.row.add(aData).draw().node());
                 $row.addClass('editing');
 
-                $table.find('tbody').prepend($row);
                 this._getRowTemplate($row, true);
                 this._setFocus(dt, $row);
             }

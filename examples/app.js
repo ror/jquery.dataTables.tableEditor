@@ -593,8 +593,8 @@ $(document).ready(function () {
             {
                 "data": "name",
                 "title": "Name",
-                "editable": true
-                //"type": "text" 默认是input
+                "editable": true,
+                "defaultContent": ""
             },
             {
                 "data": "position",
@@ -610,12 +610,14 @@ $(document).ready(function () {
                         {id: 'System Architect', text: 'System Architect'},
                         {id: 'Accountant', text: 'Accountant'}
                     ]
-                }
+                },
+                "defaultContent": "" //fixme 添加新行必须设置，否则提示错误
             },
             {
                 "data": "salary",
                 "title": "Salary",
-                "editable": true
+                "editable": true,
+                "defaultContent": ""
             },
 
             {
@@ -627,23 +629,27 @@ $(document).ready(function () {
                 "options": {
                     format: 'yyyy/mm/dd',
                     startDate: '-3d'
-                }
+                },
+                "defaultContent": ""
             },
 
             {
                 "data": "office",
                 "title": "Office",
-                "class": "center"
+                "class": "center",
+                "defaultContent": ""
             },
             {
                 "data": "extn",
                 "title": "Extension",
-                "class": "center"
+                "class": "center",
+                "defaultContent": ""
             },
             {
                 "data": "status",
                 "visible": false,
-                "searchable": false
+                "searchable": false,
+                "defaultContent": ""
             },
             {
                 "data": "deleted",
@@ -659,7 +665,8 @@ $(document).ready(function () {
                 },
                 "defaultContent": 0,
                 "searchable": false,
-                "sortable": false
+                "sortable": false,
+                "defaultContent": ""
             }
         ],
 

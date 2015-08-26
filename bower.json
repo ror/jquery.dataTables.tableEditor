@@ -35,7 +35,8 @@
     "jquery": ">=1.7.0",
     "datatables": ">=1.10.8",
     "select2": "~4.0.0",
-    "bootstrap-datepicker": "~1.4.0"
+    "bootstrap-datepicker": "~1.4.0",
+    "jquery-validation": "~1.14.0"
   },
   "devDependencies": {
     "chai": "latest",

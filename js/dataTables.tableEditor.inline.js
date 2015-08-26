@@ -134,6 +134,7 @@
                 });
 
                 $(this.s.dt.table().node()).on('save.dt.editable', function (e) {
+
                     self._updateRowState($(self.s.dt.row(e.rowIndex)));
                 });
 
@@ -146,6 +147,13 @@
                     self._addRow();
                 });
 
+                //
+                //$(this.s.dt.table().node()).on( 'xhr', function () {
+                //    var data = self.s.dt.ajax.params();
+                //    console.log(data);
+                //});
+
+                // 点击文档（空白）区域，做各种恢复处理
                 $(document).on('click', function (e) {
                     var $target = $(e.target),
                         $table = $(self.s.dt.table().node()),
@@ -367,6 +375,7 @@
                     $row.removeClass('editing');
                 }
             },
+
             _isEditable: function (dt, $cell) {
                 var cellIdx = dt.cell($cell).index().column;
                 if ($cell.attr('data-editable') == "false" || $cell.closest('tr').attr('data-editable') == "false") {
@@ -439,7 +448,7 @@
                         }
 
                         // 默认使用 `input` 文本域
-                        template = $('<input type="text" class="span12" value="">');
+                        template = $('<input type="text" class="span12" value="" required>');
 
                         // 构建datepicker
                         template.datepicker(oOptions);
@@ -450,7 +459,7 @@
                     }
                     default:
                     {
-                        template = $('<input type="text" class="span12" value="">');
+                        template = $('<input type="text" class="span12" value="" required>');
 
                         if (template.is('input')) {
                             $html = template.val($cell.text());

@@ -134,7 +134,6 @@
                 });
 
                 $(this.s.dt.table().node()).on('save.dt.editable', function (e) {
-
                     self._updateRowState($(self.s.dt.row(e.rowIndex)));
                 });
 
@@ -146,12 +145,6 @@
                 $(document).on('click', '[data-action="addRow"]', function (e) {
                     self._addRow();
                 });
-
-                //
-                //$(this.s.dt.table().node()).on( 'xhr', function () {
-                //    var data = self.s.dt.ajax.params();
-                //    console.log(data);
-                //});
 
                 // 点击文档（空白）区域，做各种恢复处理
                 $(document).on('click', function (e) {
@@ -264,6 +257,7 @@
                 this._dirtyValues = {};
                 dt.draw();
             },
+
             _updateRowState: function ($row) {
                 var dt = this.s.dt,
                     row = dt.row($row),
@@ -334,6 +328,10 @@
                 // 表单验证
                 if ($form.length == 0 || $form.valid()) {
 
+                    // fixme 不起作用
+                    // var data = dt.table().$('input, select').serialize();
+                    // console.log(data);
+
                     if (dt.row($row).node() == null) {
                         var aoColumns = dt.settings()[0].aoColumns,
                             visibleCount = 0,
@@ -346,6 +344,8 @@
 
                         var row = dt.row.add(rowData),
                             rowIdx = row.index();
+
+                        console.log(rowData);
                     } else {
                         rowData = dt.row($row).data(),
                             rowIdx = dt.row($row).index();
@@ -359,10 +359,14 @@
                             rowData[jsonProp] = jsonValue;
                         });
 
+                        console.log(rowData);
                         dt.row($row).data(rowData);
                     }
 
                     dt.draw(false);
+
+                    //todo 保存到服务器
+                    console.log(dt.settings()[0].oInit.editUrl);
 
                     // 触发保存事件，传入数据
                     $(dt.table().node()).trigger({
@@ -482,6 +486,7 @@
                     $row.find('input').eq(0).focus();
                 }
             },
+
             _callDefaultEditHandler: function ($cell, $row, $table) {
                 // 如果在编辑一行，在编辑另一行之前保存它
                 var $inputs = $('input', $table),
@@ -568,6 +573,10 @@
          */
         TableEditor.versionCheck = function( current, target )
         {
+            if (typeof current === 'undefined'){
+              return false;
+            }
+
             var aThis = current.split('.');
             var aThat = target.split('.');
             var iThis, iThat;

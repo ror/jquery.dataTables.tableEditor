@@ -87,7 +87,8 @@ $(document).ready(function () {
         editable: true,
         dirtyData: true,
         lockable: true,
-        deletable: true
+        deletable: true,
+        editUrl: "/"
     })
 })
 ;

@@ -326,7 +326,8 @@
                 }
 
                 // 表单验证
-                if ($form.length == 0 || $form.valid()) {
+                if (!($form.length == 0 || $form.valid())) {
+                } else {
 
                     // fixme 不起作用
                     // var data = dt.table().$('input, select').serialize();
@@ -359,14 +360,13 @@
                             rowData[jsonProp] = jsonValue;
                         });
 
-                        console.log(rowData);
                         dt.row($row).data(rowData);
                     }
 
                     dt.draw(false);
 
                     //todo 保存到服务器
-                    console.log(dt.settings()[0].oInit.editUrl);
+                    this._saveToServer(rowData);
 
                     // 触发保存事件，传入数据
                     $(dt.table().node()).trigger({
@@ -378,6 +378,50 @@
                     // 删除样式类 'editing'
                     $row.removeClass('editing');
                 }
+            },
+
+            //ajax 到服务器
+            _saveToServer: function (rowData) {
+                var url = this.s.dt.settings()[0].oInit.ajaxUrl,
+                    postUrl = url;
+                if (typeof rowData.id !== 'undefined') {
+                    postUrl = url + "/" + rowData.id;
+                }
+
+                $.ajax({
+                    //提交数据的类型 POST GET, 默认为 "GET"。注意：其它 HTTP 请求方法，如 PUT 和 DELETE 也可以使用，
+                    // 但仅部分浏览器支持。
+                    type: "POST",
+                    //提交的网址
+                    url: postUrl,
+                    //提交的数据
+                    data: rowData,
+                    //返回数据的格式, "xml", "html", "script", "json", "jsonp", "text"
+                    datatype: "json",
+                    //在请求之前调用的函数
+                    beforeSend: function () {
+                        //$("#msg").html("logining");
+                        console.log("start...");
+                        console.log(rowData);
+                    },
+                    //成功返回之后调用的函数
+                    success: function (data) {
+                        //$("#msg").html();
+                        //console.log(decodeURI(data));
+                    },
+                    //调用执行后调用的函数
+                    complete: function (XMLHttpRequest, textStatus) {
+                        //alert(XMLHttpRequest.responseText);
+                        alert(textStatus);
+                        console.log("finished!");
+                        //HideLoading();
+                    },
+                    //调用出错执行的函数
+                    error: function (e) {
+                        //请求出错处理
+                        console.log(e);
+                    }
+                });
             },
 
             _isEditable: function (dt, $cell) {
@@ -525,7 +569,7 @@
             _addRow: function () {
                 var dt = this.s.dt,
                     $table = $(dt.table().node()),
-                    //$header = $(dt.table().header()),
+                //$header = $(dt.table().header()),
                     $row,
                     aData = [];
 
@@ -571,19 +615,18 @@
          *  @example
          *    alert( TableEditor.versionCheck(TableEditor.version， '0.1.0') ); //返回 false
          */
-        TableEditor.versionCheck = function( current, target )
-        {
-            if (typeof current === 'undefined'){
-              return false;
+        TableEditor.versionCheck = function (current, target) {
+            if (typeof current === 'undefined') {
+                return false;
             }
 
             var aThis = current.split('.');
             var aThat = target.split('.');
             var iThis, iThat;
 
-            for ( var i=0, iLen=aThat.length ; i<iLen ; i++ ) {
-                iThis = parseInt( aThis[i], 10 ) || 0;
-                iThat = parseInt( aThat[i], 10 ) || 0;
+            for (var i = 0, iLen = aThat.length; i < iLen; i++) {
+                iThis = parseInt(aThis[i], 10) || 0;
+                iThat = parseInt(aThat[i], 10) || 0;
 
                 // Parts are the same, keep comparing
                 if (iThis === iThat) {

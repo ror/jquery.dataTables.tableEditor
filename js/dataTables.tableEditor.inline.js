@@ -142,7 +142,9 @@
                     self._deleteRow(self.s.dt.row($(this).closest('tr')));
                 });
 
-                $(document).on('click', '[data-action="addRow"]', function (e) {
+                //$(document).on('click', '[data-action="addRow"]', function (e) {
+                $(document).on('click', 'a.buttons-add', function (e) {
+                    e.stopPropagation();
                     self._addRow();
                 });
 
@@ -159,7 +161,7 @@
                         return;
                     }
 
-                    // 如果点击了带有 `data-action="addRow"` 属性的元素，返回
+                    // fixme 如果点击了带有 `data-action="addRow"` 属性的元素，返回
                     if ($target.attr('data-action') === 'addRow') {
                         return;
                     }
@@ -318,7 +320,8 @@
                     $cells = $row.find('td'),
                     rowData = {},
                     rowIdx = 0,
-                    $table = $(dt.table().node());
+                    $table = $(dt.table().node()),
+                    data;
 
                 // 确保有输入
                 if ($('input', $table).length < 1) {
@@ -326,47 +329,26 @@
                 }
 
                 // 表单验证
-                if (!($form.length == 0 || $form.valid())) {
-                } else {
+                if ($form.length == 0 || $form.valid()) {
+                    rowData = dt.row($row).data(),
+                        rowIdx = dt.row($row).index();
 
-                    // fixme 不起作用
-                    // var data = dt.table().$('input, select').serialize();
-                    // console.log(data);
+                    // 序列化表单数据
+                    // data = $form.serializeArray();
+                    data = dt.table().$('input, select').serializeArray();
 
-                    if (dt.row($row).node() == null) {
-                        var aoColumns = dt.settings()[0].aoColumns,
-                            visibleCount = 0,
-                            $td = $row.find('td');
-                        $.each(aoColumns, function (key, value) {
-                            var jsonValue = (value.bVisible) ? $td.eq(visibleCount).find('input').val() : null;
-                            rowData[value.mData] = jsonValue;
-                            visibleCount++;
-                        });
+                    //
+                    $.each(data, function () {
+                        rowData[this.name] = this.value;
+                    });
 
-                        var row = dt.row.add(rowData),
-                            rowIdx = row.index();
-
-                        console.log(rowData);
-                    } else {
-                        rowData = dt.row($row).data(),
-                            rowIdx = dt.row($row).index();
-
-                        $cells.each(function () {
-                            var cell = dt.cell(this),
-                                $input = $(cell.node()).find('input'),
-                                jsonProp = dt.settings()[0].aoColumns[dt.cell(this).index().column].mData,
-                                jsonValue = ( $input.length != 0 ) ? $input.val() : cell.data();
-
-                            rowData[jsonProp] = jsonValue;
-                        });
-
-                        dt.row($row).data(rowData);
-                    }
+                    dt.row($row).data(rowData);
 
                     dt.draw(false);
 
                     //todo 保存到服务器
                     this._saveToServer(rowData);
+                    //this._saveToServer(data);
 
                     // 触发保存事件，传入数据
                     $(dt.table().node()).trigger({
@@ -384,6 +366,8 @@
             _saveToServer: function (rowData) {
                 var url = this.s.dt.settings()[0].oInit.ajaxUrl,
                     postUrl = url;
+
+                //如果存在 `id`，那么就是更新或删除
                 if (typeof rowData.id !== 'undefined') {
                     postUrl = url + "/" + rowData.id;
                 }
@@ -409,6 +393,7 @@
                         //$("#msg").html();
                         //console.log(decodeURI(data));
                     },
+
                     //调用执行后调用的函数
                     complete: function (XMLHttpRequest, textStatus) {
                         //alert(XMLHttpRequest.responseText);
@@ -462,6 +447,7 @@
                 var dt = this.s.dt,
                     $cell = oCell,
                     sType = oCellSetting.type,
+                    sName = oCellSetting.data,
                     oOptions = oCellSetting.options || {},
                     $html, template;
 
@@ -478,7 +464,7 @@
                         }
 
                         //添加select元素 - 必须先写入，不然后续无法使用
-                        var $select = $cell.html($("<select></select>")).find('select');
+                        var $select = $cell.html($("<select name='" + sName + "'></select>")).find('select');
 
                         //构建select2
                         template = $select.select2(oOptions);
@@ -496,7 +482,7 @@
                         }
 
                         // 默认使用 `input` 文本域
-                        template = $('<input type="text" class="span12" value="" required>');
+                        template = $('<input type="text" class="span12" name="' + sName + '" required>');
 
                         // 构建datepicker
                         template.datepicker(oOptions);
@@ -507,7 +493,7 @@
                     }
                     default:
                     {
-                        template = $('<input type="text" class="span12" value="" required>');
+                        template = $('<input type="text" class="span12" name="' + sName + '" required>');
 
                         if (template.is('input')) {
                             $html = template.val($cell.text());
@@ -569,7 +555,6 @@
             _addRow: function () {
                 var dt = this.s.dt,
                     $table = $(dt.table().node()),
-                //$header = $(dt.table().header()),
                     $row,
                     aData = [];
 
@@ -587,7 +572,7 @@
                 // 不能使用 `append` 等方法操作表格，否则无法应用下面的模板
                 $row = $(dt.row.add(aData).draw().node());
                 $row.addClass('editing');
-
+                console.log($row);
                 this._getRowTemplate($row, true);
                 this._setFocus(dt, $row);
             }

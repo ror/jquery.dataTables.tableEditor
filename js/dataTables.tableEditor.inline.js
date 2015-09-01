@@ -130,7 +130,6 @@
 
                 $(this.s.dt.table().node()).on('click', 'i[data-action="unlock"]', function (e) {
                     e.stopPropagation();
-                    //console.log('unlock');
                 });
 
                 $(this.s.dt.table().node()).on('save.dt.editable', function (e) {
@@ -142,7 +141,8 @@
                     self._deleteRow(self.s.dt.row($(this).closest('tr')));
                 });
 
-                //$(document).on('click', '[data-action="addRow"]', function (e) {
+                // fixme extend button: 添加 ADD，EDIT，DELETE，LOCK/UNLOCK 等4个按钮
+                // $(document).on('click', '[data-action="addRow"]', function (e) {
                 $(document).on('click', 'a.buttons-add', function (e) {
                     e.stopPropagation();
                     self._addRow();
@@ -438,9 +438,80 @@
                         var oCellSetting = dt.settings()[0].aoColumns[cellIdx],
                             $html;
 
-                        self._getCellTemplate($cell, oCellSetting);
+                        if (dt.settings()[0].oInit.editor && dt.settings()[0].oInit.editor.type === 'modal') {
+                            self._getModalTemplate($cell, oCellSetting);
+                        } else {
+                            self._getCellTemplate($cell, oCellSetting);
+                        }
                     }
                 });
+            },
+
+            _getModalTemplate: function ($cell, oCellSetting) {
+                //console.log("modal");
+                var dt = this.s.dt,
+                    oInit = dt.settings()[0].oInit,
+                    $cell = oCell,
+                    sType = oCellSetting.type,
+                    sName = oCellSetting.data,
+                    oOptions = oCellSetting.options || {},
+                    $html, template;
+
+                //保存原始值
+                var sText = $cell.text();
+
+                switch (sType) {
+                    //使用select2.js
+                    case "select":
+                    {
+                        //确保引入select2.js
+                        if (typeof $.fn.select2 === 'undefined') {
+                            alert('Select2 has not been installed, please download it from https://select2.github.io/ !');
+                        }
+
+                        //添加select元素 - 必须先写入，不然后续无法使用
+                        var $select = $cell.html($("<select name='" + sName + "'></select>")).find('select');
+
+                        //构建select2
+                        template = $select.select2(oOptions);
+
+                        //设定当前值为默认选定值
+                        template = $select.select2("val", sText);
+
+                        break;
+                    }
+                    case "date" :
+                    {
+                        //确保引入bootstrap-datepicker.js,并且版本大于 `1.4.0`
+                        if (typeof $.fn.datepicker === 'undefined' || !TableEditor.versionCheck($.fn.datepicker.version, "1.4.0")) {
+                            alert('Bootstrap Datepicker has not been installed, please download it from https://github.com/eternicode/bootstrap-datepicker !');
+                        }
+
+                        // 默认使用 `input` 文本域
+                        template = $('<input type="text" class="span12" name="' + sName + '" required>');
+
+                        // 构建datepicker
+                        template.datepicker(oOptions);
+
+                        // 设定原值为默认值
+                        $cell.html(template.val(sText));
+                        break;
+                    }
+                    default:
+                    {
+                        template = $('<input type="text" class="span12" name="' + sName + '" required>');
+
+                        if (template.is('input')) {
+                            $html = template.val($cell.text());
+                        } else {
+                            template.find('input').val($cell.text());
+                            $html = template;
+                        }
+
+                        $cell.html(template);
+                        //break;
+                    }
+                }
             },
 
             _getCellTemplate: function (oCell, oCellSetting) {
@@ -563,16 +634,10 @@
                     return;
                 }
 
-                // fixme dataTable不允许添加 `null` 值的行，这里用空字符串代替
-                //$header.find('th').each(function (key, value) {
-                //    aData.push("a" + key);
-                //});
-                //console.log(aData)
-
                 // 不能使用 `append` 等方法操作表格，否则无法应用下面的模板
                 $row = $(dt.row.add(aData).draw().node());
                 $row.addClass('editing');
-                console.log($row);
+
                 this._getRowTemplate($row, true);
                 this._setFocus(dt, $row);
             }

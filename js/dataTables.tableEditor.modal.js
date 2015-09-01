@@ -1,14 +1,14 @@
 /*
- * Editor
+ * ModalEditor
  *
- * https://github.com/eherve/dataTable-Editor/blob/master/js/tableEditor.js
+ * https://github.com/eherve/dataTable-ModalEditor/blob/master/js/tableEditor.js
  */
 
 (function (window, document) {
 
     var factory = function ($, DataTable) {
 
-        var Editor = function (config) {
+        var ModalEditor = function (config) {
             config = config || {};
             var self = this;
             // dom table
@@ -65,7 +65,7 @@
         };
 
         // Modal
-        Editor.prototype = {
+        ModalEditor.prototype = {
 
             buildModal: function (config) {
                 var self = this;
@@ -119,14 +119,15 @@
             // Button Actions
             _create: function () {
                 var self = this;
-                loadFields.call(self, null, function () {
+                this.loadFields.call(self, null, function () {
                     self.validateButton.on('click', function () {
-                        var data = retrieveData.call(self);
-                        validateFields.call(self, function (valid) {
+                        var data = self.retrieveData.call(self);
+
+                        self.validateFields.call(self, function (valid) {
                             if (!valid) return;
                             self.formValidation.call(self, data, function (err) {
                                 if (err) return self.setError(err);
-                                self.action(data, finishedHandler.bind(self));
+                                self.action(data, self.finishedHandler.bind(self));
                             });
                         });
                     });
@@ -136,7 +137,7 @@
 
             _edit: function (selectedRowData) {
                 var self = this;
-                loadFields.call(self, selectedRowData, function () {
+                this.loadFields.call(self, selectedRowData, function () {
                     for (var index = 0; index < self.fields.length; ++index) {
                         var field = self.fields[index];
                         if (field) {
@@ -145,13 +146,14 @@
                         }
                     }
                     self.validateButton.on('click', function () {
-                        var data = retrieveData.call(self)
-                        validateFields.call(self, function (valid) {
+                        var data = self.retrieveData.call(self);
+
+                        self.validateFields.call(self, function (valid) {
                             if (!valid) return;
                             self.formValidation.call(self, data, function (err) {
                                 if (err) return self.setError(err);
                                 if (self.idField && selectedRowData) data.id = selectedRowData[self.idField];
-                                self.action(data, finishedHandler.bind(self));
+                                self.action(data, self.finishedHandler.bind(self));
                             });
                         });
                     });
@@ -161,13 +163,13 @@
 
             _remove: function (selectedRowsData) {
                 var self = this;
-                loadFields.call(self, selectedRowsData, function () {
+                this.loadFields.call(self, selectedRowsData, function () {
                     self.validateButton.on('click', function () {
                         var data = {ids: []};
                         if (self.idField && selectedRowsData)
                             for (var index = 0; index < selectedRowsData.length; ++index)
                                 data.ids.push(selectedRowsData[index][self.idField]);
-                        self.action(data, finishedHandler.bind(self));
+                        self.action(data, self.finishedHandler.bind(self));
                     });
                     self.modal.modal();
                 });
@@ -206,7 +208,7 @@
                 for (var index = 0; index <= this.fields.length; ++index) {
                     var field = this.fields[index];
                     if (field && field.name && field.getData != undefined)
-                        addToData(data, field.name, field.getData());
+                        this.addToData(data, field.name, field.getData());
                 }
                 return data;
             },
@@ -273,7 +275,7 @@
                 this.name = config.name;
                 this.options = config.options || {};
                 if (this.type == 'field') this.component = config.component;
-                else buildComponent.call(this);
+                else this.buildComponent.call(this);
 
                 this.html = this.component ? this.component.html || this.component : "";
 
@@ -336,24 +338,24 @@
                             this.component.input.attr('disabled', "disabled");
                         else this.component.input.removeAttr('disabled');
                     }
-                }
+                };
                 this.updateEnabled();
             },
 
             buildComponent: function () {
                 this.component = {html: $('<div class="control-group"/>')};
-                if (this.type == 'label') buildLabel.call(this);
-                else if (this.type == 'legend') buildLegend.call(this);
+                if (this.type == 'label') this.buildLabel.call(this);
+                else if (this.type == 'legend') this.buildLegend.call(this);
                 else if (this.type == 'input') {
-                    if (this.options.type == 'text') buildSimpleInput.call(this, this.options.type);
-                    else if (this.options.type == 'password') buildSimpleInput.call(this, this.options.type);
-                    else if (this.options.type == 'date') buildSimpleInput.call(this, this.options.type);
-                    else if (this.options.type == 'checkbox') buildInputCheckbox.call(this);
-                    else if (this.options.type == 'textarea') buildInputTextarea.call(this);
-                    else if (this.options.type == 'select') buildInputSelect.call(this);
+                    if (this.options.type == 'text') this.buildSimpleInput.call(this, this.options.type);
+                    else if (this.options.type == 'password') this.buildSimpleInput.call(this, this.options.type);
+                    else if (this.options.type == 'date') this.buildSimpleInput.call(this, this.options.type);
+                    else if (this.options.type == 'checkbox') this.buildInputCheckbox.call(this);
+                    else if (this.options.type == 'textarea') this.buildInputTextarea.call(this);
+                    else if (this.options.type == 'select') this.buildInputSelect.call(this);
                     else return console.error("Input field type", this.options.type, "not managed !");
-                } else if (this.type == 'div') buildDiv.call(this);
-                else if (this.type == 'button') buildButton.call(this);
+                } else if (this.type == 'div') this.buildDiv.call(this);
+                else if (this.type == 'button') this.buildButton.call(this);
                 else return console.error("Field type", this.type, "not managed !");
                 if (this.component.input) {
                     if (this.options.attr) for (var key in this.options.attr)
@@ -385,7 +387,7 @@
                 };
                 this.component.getData = function () {
                     return this.input.val();
-                }
+                };
                 this.component.clear = function () {
                     this.setData();
                 }
@@ -403,10 +405,10 @@
                 };
                 this.component.getData = function () {
                     return this.input.prop('checked');
-                }
+                };
                 this.component.clear = function () {
                     this.input.removeAttr('checked');
-                }
+                };
                 if ('function' == typeof this.options.change) {
                     var self = this;
                     self.component.input.bind('change', function (event) {
@@ -427,7 +429,7 @@
                 };
                 this.component.getData = function () {
                     return this.input.val();
-                }
+                };
                 this.component.clear = function () {
                     this.setData();
                 }
@@ -455,7 +457,7 @@
                 };
                 self.component.setData = function (data) {
                     if (data == undefined) return self.component.input.find('option:selected')
-                        .removeAttr('selected')
+                        .removeAttr('selected');
                     var equals = getEqualsFunction(self.options);
                     self.component.input.find('option').each(function () {
                         if (typeof data == "object" && data.length != undefined) {
@@ -694,17 +696,17 @@
         //  alert("Warning: TableTools 2 requires DataTables 1.9.0 or newer - www.datatables.net/download");
         //}
 
-        $.fn.dataTable.Editor = Editor;
-        $.fn.DataTable.Editor = Editor;
+        $.fn.dataTable.ModalEditor = ModalEditor;
+        $.fn.DataTable.ModalEditor = ModalEditor;
 
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
          * Initialisation
          */
 
-        // DataTables creation - check if the Editor have been defined for this table,
+        // DataTables creation - check if the ModalEditor have been defined for this table,
         // they will have been if the `B` option was used in `dom`, otherwise we should
-        // create the Editor instance here so they can be inserted into the document
+        // create the ModalEditor instance here so they can be inserted into the document
         // using the API
 
         $(document).on( 'init.dt.dte', function (e, settings, json) {
@@ -715,11 +717,11 @@
             var opts = settings.oInit.editor || DataTable.defaults.editor;
 
             if ( opts && ! settings._editor ) {
-                new Editor( settings ).container();
+                new ModalEditor( settings ); //.container();
             }
         } );
 
-        return Editor;
+        return ModalEditor;
     }; // /factory
 
 
@@ -731,7 +733,7 @@
         // Node/CommonJS
         factory(require('jquery'), require('datatables'));
     }
-    else if (jQuery && !jQuery.fn.dataTable.Editor) {
+    else if (jQuery && !jQuery.fn.dataTable.ModalEditor) {
         // Otherwise simply initialise as normal, stopping multiple evaluation
         factory(jQuery, jQuery.fn.dataTable);
     }
